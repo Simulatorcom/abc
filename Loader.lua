@@ -3,10 +3,8 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
--- Unique ID für altes UI Cleanup
 local GUI_NAME = "UltraLuxuryHub_UI"
 
--- Clean up falls Script erneut geladen wird
 if CoreGui:FindFirstChild(GUI_NAME) then
 	CoreGui[GUI_NAME]:Destroy()
 end
@@ -17,21 +15,63 @@ end
 local Library = {
 	Flags = {},
 	ActiveToggles = {},
-	Theme = {
-		Background = Color3.fromRGB(11, 12, 18),
-		Topbar = Color3.fromRGB(16, 17, 26),
-		Container = Color3.fromRGB(20, 22, 34),
-		Element = Color3.fromRGB(26, 28, 44),
-		Accent = Color3.fromRGB(168, 85, 247), -- Neon Purple/Violet
-		AccentGlow = Color3.fromRGB(192, 132, 252),
-		Text = Color3.fromRGB(245, 245, 250),
-		SubText = Color3.fromRGB(140, 145, 170),
-		Border = Color3.fromRGB(40, 44, 68),
-		Hover = Color3.fromRGB(32, 35, 54)
+	CurrentTheme = "Dark",
+	Themes = {
+		Dark = {
+			Background = Color3.fromRGB(13, 15, 23),
+			Topbar = Color3.fromRGB(18, 20, 31),
+			Sidebar = Color3.fromRGB(15, 17, 26),
+			Container = Color3.fromRGB(22, 25, 38),
+			Element = Color3.fromRGB(28, 32, 48),
+			Accent = Color3.fromRGB(168, 85, 247),
+			AccentGlow = Color3.fromRGB(192, 132, 252),
+			Text = Color3.fromRGB(245, 245, 250),
+			SubText = Color3.fromRGB(140, 145, 170),
+			Border = Color3.fromRGB(45, 50, 75),
+			Hover = Color3.fromRGB(35, 40, 60)
+		},
+		Midnight = {
+			Background = Color3.fromRGB(8, 8, 14),
+			Topbar = Color3.fromRGB(12, 12, 20),
+			Sidebar = Color3.fromRGB(10, 10, 17),
+			Container = Color3.fromRGB(15, 16, 26),
+			Element = Color3.fromRGB(20, 22, 36),
+			Accent = Color3.fromRGB(59, 130, 246),
+			AccentGlow = Color3.fromRGB(96, 165, 250),
+			Text = Color3.fromRGB(240, 245, 255),
+			SubText = Color3.fromRGB(120, 130, 160),
+			Border = Color3.fromRGB(30, 35, 60),
+			Hover = Color3.fromRGB(25, 28, 45)
+		},
+		Crimson = {
+			Background = Color3.fromRGB(16, 10, 12),
+			Topbar = Color3.fromRGB(24, 14, 17),
+			Sidebar = Color3.fromRGB(20, 12, 14),
+			Container = Color3.fromRGB(30, 18, 22),
+			Element = Color3.fromRGB(40, 22, 28),
+			Accent = Color3.fromRGB(239, 68, 68),
+			AccentGlow = Color3.fromRGB(248, 113, 113),
+			Text = Color3.fromRGB(255, 240, 242),
+			SubText = Color3.fromRGB(170, 130, 135),
+			Border = Color3.fromRGB(65, 30, 38),
+			Hover = Color3.fromRGB(50, 24, 30)
+		},
+		Emerald = {
+			Background = Color3.fromRGB(9, 15, 13),
+			Topbar = Color3.fromRGB(13, 22, 19),
+			Sidebar = Color3.fromRGB(11, 18, 16),
+			Container = Color3.fromRGB(17, 28, 24),
+			Element = Color3.fromRGB(22, 36, 30),
+			Accent = Color3.fromRGB(16, 185, 129),
+			AccentGlow = Color3.fromRGB(52, 211, 153),
+			Text = Color3.fromRGB(240, 253, 248),
+			SubText = Color3.fromRGB(130, 165, 150),
+			Border = Color3.fromRGB(35, 60, 50),
+			Hover = Color3.fromRGB(28, 45, 38)
+		}
 	}
 }
 
--- Lucide Icon Engine
 local Icons = nil
 pcall(function()
 	Icons = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/icons.lua"))()
@@ -74,14 +114,14 @@ end
 
 local function Corner(parent, radius)
 	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius or 8)
+	c.CornerRadius = UDim.new(0, radius or 10)
 	c.Parent = parent
 	return c
 end
 
 local function Stroke(parent, color, thickness)
 	local s = Instance.new("UIStroke")
-	s.Color = color or Library.Theme.Border
+	s.Color = color or Library.Themes[Library.CurrentTheme].Border
 	s.Thickness = thickness or 1.2
 	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	s.Parent = parent
@@ -116,9 +156,8 @@ function Library:CreateWindow(Settings)
 	Settings = Settings or {}
 	local WindowName = Settings.Name or "Modern Hub"
 	local WindowIcon = Settings.Icon
-	local ToggleKey = Settings.ToggleUIKeybind or "K"
+	local CurrentToggleKey = Settings.ToggleUIKeybind or "K"
 
-	-- ScreenGui setup
 	local ScreenGui = Instance.new("ScreenGui")
 	ScreenGui.Name = GUI_NAME
 	ScreenGui.ResetOnSpawn = false
@@ -132,35 +171,44 @@ function Library:CreateWindow(Settings)
 		ScreenGui.Parent = CoreGui
 	end
 
-	-- Main Window Frame
 	local Main = Instance.new("Frame")
 	Main.Name = "MainFrame"
-	Main.Size = UDim2.new(0, 620, 0, 420)
-	Main.Position = UDim2.new(0.5, -310, 0.5, -210)
-	Main.BackgroundColor3 = Library.Theme.Background
+	Main.Size = UDim2.new(0, 640, 0, 440)
+	Main.Position = UDim2.new(0.5, -320, 0.5, -220)
+	Main.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Background
 	Main.BorderSizePixel = 0
 	Main.ClipsDescendants = true
 	Main.Parent = ScreenGui
 
-	Corner(Main, 12)
-	local MainStroke = Stroke(Main, Library.Theme.Border, 1.5)
+	Corner(Main, 14)
+	local MainStroke = Stroke(Main, Library.Themes[Library.CurrentTheme].Border, 1.5)
 
-	-- Topbar
+	local GlowBg = Instance.new("ImageLabel")
+	GlowBg.Name = "Glow"
+	GlowBg.Size = UDim2.new(1, 60, 1, 60)
+	GlowBg.Position = UDim2.new(0, -30, 0, -30)
+	GlowBg.BackgroundTransparency = 1
+	GlowBg.Image = "rbxassetid://5028857472"
+	GlowBg.ImageColor3 = Library.Themes[Library.CurrentTheme].Accent
+	GlowBg.ImageTransparency = 0.8
+	GlowBg.ScaleType = Enum.ScaleType.Slice
+	GlowBg.SliceCenter = Rect.new(24, 24, 276, 276)
+	GlowBg.Parent = Main
+
 	local Topbar = Instance.new("Frame")
 	Topbar.Name = "Topbar"
 	Topbar.Size = UDim2.new(1, 0, 0, 50)
-	Topbar.BackgroundColor3 = Library.Theme.Topbar
+	Topbar.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Topbar
 	Topbar.BorderSizePixel = 0
 	Topbar.Parent = Main
 
-	Corner(Topbar, 12)
+	Corner(Topbar, 14)
 	MakeDraggable(Main, Topbar)
 
-	-- Sub-line separator glow
 	local GlowLine = Instance.new("Frame")
 	GlowLine.Size = UDim2.new(1, 0, 0, 1)
 	GlowLine.Position = UDim2.new(0, 0, 1, -1)
-	GlowLine.BackgroundColor3 = Library.Theme.Accent
+	GlowLine.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Accent
 	GlowLine.BorderSizePixel = 0
 	GlowLine.Parent = Topbar
 
@@ -168,35 +216,48 @@ function Library:CreateWindow(Settings)
 	TopbarIcon.Size = UDim2.new(0, 22, 0, 22)
 	TopbarIcon.Position = UDim2.new(0, 16, 0.5, -11)
 	TopbarIcon.BackgroundTransparency = 1
-	TopbarIcon.ImageColor3 = Library.Theme.Accent
+	TopbarIcon.ImageColor3 = Library.Themes[Library.CurrentTheme].Accent
 	TopbarIcon.Parent = Topbar
 	ApplyIcon(TopbarIcon, WindowIcon)
 
 	local Title = Instance.new("TextLabel")
-	Title.Size = UDim2.new(1, -80, 1, 0)
+	Title.Size = UDim2.new(1, -100, 1, 0)
 	Title.Position = UDim2.new(0, TopbarIcon.Visible and 46 or 16, 0, 0)
 	Title.BackgroundTransparency = 1
 	Title.Text = WindowName
-	Title.TextColor3 = Library.Theme.Text
-	Title.TextSize = 16
+	Title.TextColor3 = Library.Themes[Library.CurrentTheme].Text
+	Title.TextSize = 15
 	Title.Font = Enum.Font.GothamBold
 	Title.TextXAlignment = Enum.TextXAlignment.Left
 	Title.Parent = Topbar
 
-	-- Sidebar (Tabs Container)
+	local CloseBtn = Instance.new("TextButton")
+	CloseBtn.Name = "CloseButton"
+	CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+	CloseBtn.Position = UDim2.new(1, -40, 0.5, -15)
+	CloseBtn.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element
+	CloseBtn.Text = "×"
+	CloseBtn.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
+	CloseBtn.TextSize = 22
+	CloseBtn.Font = Enum.Font.GothamMedium
+	CloseBtn.AutoButtonColor = false
+	CloseBtn.Parent = Topbar
+	Corner(CloseBtn, 8)
+	local CloseStroke = Stroke(CloseBtn, Library.Themes[Library.CurrentTheme].Border, 1)
+
 	local Sidebar = Instance.new("Frame")
-	Sidebar.Size = UDim2.new(0, 160, 1, -50)
+	Sidebar.Size = UDim2.new(0, 170, 1, -50)
 	Sidebar.Position = UDim2.new(0, 0, 0, 50)
-	Sidebar.BackgroundColor3 = Library.Theme.Topbar
+	Sidebar.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Sidebar
 	Sidebar.BorderSizePixel = 0
 	Sidebar.Parent = Main
 
 	local TabHolder = Instance.new("ScrollingFrame")
-	TabHolder.Size = UDim2.new(1, -12, 1, -16)
+	TabHolder.Size = UDim2.new(1, -12, 1, -60)
 	TabHolder.Position = UDim2.new(0, 6, 0, 8)
 	TabHolder.BackgroundTransparency = 1
 	TabHolder.ScrollBarThickness = 2
-	TabHolder.ScrollBarImageColor3 = Library.Theme.Accent
+	TabHolder.ScrollBarImageColor3 = Library.Themes[Library.CurrentTheme].Accent
 	TabHolder.Parent = Sidebar
 
 	local TabList = Instance.new("UIListLayout")
@@ -204,41 +265,124 @@ function Library:CreateWindow(Settings)
 	TabList.Padding = UDim.new(0, 6)
 	TabList.Parent = TabHolder
 
-	-- Main Content Container
+	local SystemTabHolder = Instance.new("Frame")
+	SystemTabHolder.Size = UDim2.new(1, -12, 0, 42)
+	SystemTabHolder.Position = UDim2.new(0, 6, 1, -48)
+	SystemTabHolder.BackgroundTransparency = 1
+	SystemTabHolder.Parent = Sidebar
+
 	local ContentContainer = Instance.new("Frame")
-	ContentContainer.Size = UDim2.new(1, -172, 1, -62)
-	ContentContainer.Position = UDim2.new(0, 166, 0, 56)
+	ContentContainer.Size = UDim2.new(1, -182, 1, -62)
+	ContentContainer.Position = UDim2.new(0, 176, 0, 56)
 	ContentContainer.BackgroundTransparency = 1
 	ContentContainer.Parent = Main
 
 	local Tabs = {}
 	local FirstTab = true
+	local IsOpen = true
+	local IsAnimating = false
 
-	-- Keybind zum Ausblenden
-	local KeyCodeEnum = Enum.KeyCode[ToggleKey] or Enum.KeyCode.K
+	local function ToggleUI()
+		if IsAnimating then return end
+		IsAnimating = true
+
+		if IsOpen then
+			TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+				Size = UDim2.new(0, 640, 0, 0),
+				Position = UDim2.new(0.5, -320, 0.5, 0)
+			}):Play()
+			task.wait(0.3)
+			Main.Visible = false
+			IsOpen = false
+		else
+			Main.Visible = true
+			TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0, 640, 0, 440),
+				Position = UDim2.new(0.5, -320, 0.5, -220)
+			}):Play()
+			task.wait(0.4)
+			IsOpen = true
+		end
+		IsAnimating = false
+	end
+
+	CloseBtn.MouseButton1Click:Connect(ToggleUI)
+
+	CloseBtn.MouseEnter:Connect(function()
+		TweenService:Create(CloseBtn, TweenInfo.new(0.2), {
+			BackgroundColor3 = Color3.fromRGB(239, 68, 68),
+			TextColor3 = Color3.fromRGB(255, 255, 255)
+		}):Play()
+	end)
+	CloseBtn.MouseLeave:Connect(function()
+		TweenService:Create(CloseBtn, TweenInfo.new(0.2), {
+			BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element,
+			TextColor3 = Library.Themes[Library.CurrentTheme].SubText
+		}):Play()
+	end)
+
 	UserInputService.InputBegan:Connect(function(input, processed)
-		if not processed and input.KeyCode == KeyCodeEnum then
-			Main.Visible = not Main.Visible
+		if not processed and input.KeyCode == (Enum.KeyCode[CurrentToggleKey] or Enum.KeyCode.K) then
+			ToggleUI()
 		end
 	end)
 
+	local ThemeObjects = {
+		Frames = {Main, Topbar, Sidebar},
+		Containers = {},
+		Elements = {CloseBtn},
+		Strokes = {MainStroke, CloseStroke},
+		Accents = {GlowLine, GlowBg},
+		Texts = {Title},
+		SubTexts = {CloseBtn}
+	}
+
+	local function UpdateTheme(themeName)
+		if not Library.Themes[themeName] then return end
+		Library.CurrentTheme = themeName
+		local t = Library.Themes[themeName]
+
+		TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundColor3 = t.Background}):Play()
+		TweenService:Create(Topbar, TweenInfo.new(0.3), {BackgroundColor3 = t.Topbar}):Play()
+		TweenService:Create(Sidebar, TweenInfo.new(0.3), {BackgroundColor3 = t.Sidebar}):Play()
+		TweenService:Create(GlowLine, TweenInfo.new(0.3), {BackgroundColor3 = t.Accent}):Play()
+		TweenService:Create(GlowBg, TweenInfo.new(0.3), {ImageColor3 = t.Accent}):Play()
+		TweenService:Create(Title, TweenInfo.new(0.3), {TextColor3 = t.Text}):Play()
+		TweenService:Create(TopbarIcon, TweenInfo.new(0.3), {ImageColor3 = t.Accent}):Play()
+		TweenService:Create(MainStroke, TweenInfo.new(0.3), {Color = t.Border}):Play()
+
+		for _, tab in pairs(Tabs) do
+			if tab.Active then
+				TweenService:Create(tab.Btn, TweenInfo.new(0.3), {BackgroundColor3 = t.Container}):Play()
+				TweenService:Create(tab.Title, TweenInfo.new(0.3), {TextColor3 = t.Text}):Play()
+				TweenService:Create(tab.Icon, TweenInfo.new(0.3), {ImageColor3 = t.Accent}):Play()
+			else
+				TweenService:Create(tab.Title, TweenInfo.new(0.3), {TextColor3 = t.SubText}):Play()
+				TweenService:Create(tab.Icon, TweenInfo.new(0.3), {ImageColor3 = t.SubText}):Play()
+			end
+		end
+	end
+
 	local WindowApi = {}
 
-	function WindowApi:CreateTab(Name, Icon)
+	function WindowApi:CreateTab(Name, Icon, IsSystem)
 		local TabBtn = Instance.new("TextButton")
 		TabBtn.Size = UDim2.new(1, 0, 0, 36)
-		TabBtn.BackgroundColor3 = Library.Theme.Container
+		TabBtn.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 		TabBtn.BackgroundTransparency = 1
 		TabBtn.Text = ""
 		TabBtn.AutoButtonColor = false
-		TabBtn.Parent = TabHolder
+		TabBtn.Parent = IsSystem and SystemTabHolder or TabHolder
 		Corner(TabBtn, 8)
+
+		local TabStroke = Stroke(TabBtn, Library.Themes[Library.CurrentTheme].Border, 1)
+		TabStroke.Enabled = false
 
 		local TabIcon = Instance.new("ImageLabel")
 		TabIcon.Size = UDim2.new(0, 18, 0, 18)
 		TabIcon.Position = UDim2.new(0, 10, 0.5, -9)
 		TabIcon.BackgroundTransparency = 1
-		TabIcon.ImageColor3 = Library.Theme.SubText
+		TabIcon.ImageColor3 = Library.Themes[Library.CurrentTheme].SubText
 		TabIcon.Parent = TabBtn
 		ApplyIcon(TabIcon, Icon)
 
@@ -247,7 +391,7 @@ function Library:CreateWindow(Settings)
 		TabTitle.Position = UDim2.new(0, TabIcon.Visible and 36 or 12, 0, 0)
 		TabTitle.BackgroundTransparency = 1
 		TabTitle.Text = Name
-		TabTitle.TextColor3 = Library.Theme.SubText
+		TabTitle.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
 		TabTitle.TextSize = 13
 		TabTitle.Font = Enum.Font.GothamMedium
 		TabTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -258,7 +402,7 @@ function Library:CreateWindow(Settings)
 		Page.BackgroundTransparency = 1
 		Page.Visible = false
 		Page.ScrollBarThickness = 3
-		Page.ScrollBarImageColor3 = Library.Theme.Accent
+		Page.ScrollBarImageColor3 = Library.Themes[Library.CurrentTheme].Accent
 		Page.Parent = ContentContainer
 
 		local PageList = Instance.new("UIListLayout")
@@ -270,57 +414,73 @@ function Library:CreateWindow(Settings)
 			Page.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 12)
 		end)
 
+		local TabData = {Btn = TabBtn, Page = Page, Title = TabTitle, Icon = TabIcon, Active = false, Stroke = TabStroke}
+
 		local function ActivateTab()
 			for _, tab in pairs(Tabs) do
+				tab.Active = false
 				tab.Page.Visible = false
+				tab.Stroke.Enabled = false
 				TweenService:Create(tab.Btn, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
-				TweenService:Create(tab.Title, TweenInfo.new(0.2), {TextColor3 = Library.Theme.SubText}):Play()
-				TweenService:Create(tab.Icon, TweenInfo.new(0.2), {ImageColor3 = Library.Theme.SubText}):Play()
+				TweenService:Create(tab.Title, TweenInfo.new(0.2), {TextColor3 = Library.Themes[Library.CurrentTheme].SubText}):Play()
+				TweenService:Create(tab.Icon, TweenInfo.new(0.2), {ImageColor3 = Library.Themes[Library.CurrentTheme].SubText}):Play()
 			end
+			TabData.Active = true
 			Page.Visible = true
-			TweenService:Create(TabBtn, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
-			TweenService:Create(TabTitle, TweenInfo.new(0.2), {TextColor3 = Library.Theme.Text}):Play()
-			TweenService:Create(TabIcon, TweenInfo.new(0.2), {ImageColor3 = Library.Theme.Accent}):Play()
+			TabData.Stroke.Enabled = true
+			TweenService:Create(TabBtn, TweenInfo.new(0.2), {BackgroundTransparency = 0, BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container}):Play()
+			TweenService:Create(TabTitle, TweenInfo.new(0.2), {TextColor3 = Library.Themes[Library.CurrentTheme].Text}):Play()
+			TweenService:Create(TabIcon, TweenInfo.new(0.2), {ImageColor3 = Library.Themes[Library.CurrentTheme].Accent}):Play()
 		end
 
 		TabBtn.MouseButton1Click:Connect(ActivateTab)
+		table.insert(Tabs, TabData)
 
-		table.insert(Tabs, {Btn = TabBtn, Page = Page, Title = TabTitle, Icon = TabIcon})
-		if FirstTab then FirstTab = false; ActivateTab() end
+		if FirstTab and not IsSystem then
+			FirstTab = false
+			ActivateTab()
+		end
 
 		local TabApi = {}
 
-		-- 1. BUTTON
 		function TabApi:CreateButton(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Button"
 			local Callback = Settings.Callback or function() end
 
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 40)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 42)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			local FrStroke = Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Btn = Instance.new("TextButton")
 			Btn.Size = UDim2.new(1, 0, 1, 0)
 			Btn.BackgroundTransparency = 1
 			Btn.Text = Name
-			Btn.TextColor3 = Library.Theme.Text
+			Btn.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Btn.Font = Enum.Font.GothamSemibold
 			Btn.TextSize = 13
 			Btn.Parent = Frame
 
+			Btn.MouseEnter:Connect(function()
+				TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element}):Play()
+				TweenService:Create(FrStroke, TweenInfo.new(0.2), {Color = Library.Themes[Library.CurrentTheme].Accent}):Play()
+			end)
+			Btn.MouseLeave:Connect(function()
+				TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container}):Play()
+				TweenService:Create(FrStroke, TweenInfo.new(0.2), {Color = Library.Themes[Library.CurrentTheme].Border}):Play()
+			end)
+
 			Btn.MouseButton1Click:Connect(function()
-				TweenService:Create(Frame, TweenInfo.new(0.1), {BackgroundColor3 = Library.Theme.Accent}):Play()
-				task.wait(0.1)
-				TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Library.Theme.Container}):Play()
+				TweenService:Create(Frame, TweenInfo.new(0.08), {BackgroundColor3 = Library.Themes[Library.CurrentTheme].Accent}):Play()
+				task.wait(0.08)
+				TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container}):Play()
 				pcall(Callback)
 			end)
 		end
 
-		-- 2. TOGGLE (Mit Auto-Reset-Tracking)
 		function TabApi:CreateToggle(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Toggle"
@@ -329,34 +489,34 @@ function Library:CreateWindow(Settings)
 			local Callback = Settings.Callback or function() end
 
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 40)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 42)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
 			Label.Size = UDim2.new(1, -60, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
+			Label.Position = UDim2.new(0, 14, 0, 0)
 			Label.BackgroundTransparency = 1
 			Label.Text = Name
-			Label.TextColor3 = Library.Theme.Text
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 13
 			Label.TextXAlignment = Enum.TextXAlignment.Left
 			Label.Parent = Frame
 
 			local ToggleBox = Instance.new("Frame")
-			ToggleBox.Size = UDim2.new(0, 36, 0, 20)
-			ToggleBox.Position = UDim2.new(1, -48, 0.5, -10)
-			ToggleBox.BackgroundColor3 = Default and Library.Theme.Accent or Library.Theme.Element
+			ToggleBox.Size = UDim2.new(0, 40, 0, 22)
+			ToggleBox.Position = UDim2.new(1, -52, 0.5, -11)
+			ToggleBox.BackgroundColor3 = Default and Library.Themes[Library.CurrentTheme].Accent or Library.Themes[Library.CurrentTheme].Element
 			ToggleBox.Parent = Frame
-			Corner(ToggleBox, 10)
+			Corner(ToggleBox, 11)
 
 			local Indicator = Instance.new("Frame")
-			Indicator.Size = UDim2.new(0, 14, 0, 14)
-			Indicator.Position = Default and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-			Indicator.BackgroundColor3 = Library.Theme.Text
+			Indicator.Size = UDim2.new(0, 16, 0, 16)
+			Indicator.Position = Default and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+			Indicator.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Text
 			Indicator.Parent = ToggleBox
 			Corner(Indicator, 10)
 
@@ -365,12 +525,15 @@ function Library:CreateWindow(Settings)
 			local function SetState(val)
 				Toggled = val
 				if Flag then Library.Flags[Flag] = Toggled end
-				TweenService:Create(ToggleBox, TweenInfo.new(0.2), {BackgroundColor3 = Toggled and Library.Theme.Accent or Library.Theme.Element}):Play()
-				TweenService:Create(Indicator, TweenInfo.new(0.2), {Position = Toggled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)}):Play()
+				TweenService:Create(ToggleBox, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					BackgroundColor3 = Toggled and Library.Themes[Library.CurrentTheme].Accent or Library.Themes[Library.CurrentTheme].Element
+				}):Play()
+				TweenService:Create(Indicator, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					Position = Toggled and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+				}):Play()
 				pcall(Callback, Toggled)
 			end
 
-			-- Für Reset-Funktionalität registrieren
 			table.insert(Library.ActiveToggles, function()
 				if Toggled then SetState(false) end
 			end)
@@ -386,7 +549,6 @@ function Library:CreateWindow(Settings)
 			return {Set = SetState}
 		end
 
-		-- 3. SLIDER
 		function TabApi:CreateSlider(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Slider"
@@ -396,18 +558,18 @@ function Library:CreateWindow(Settings)
 			local Callback = Settings.Callback or function() end
 
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 50)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 52)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
 			Label.Size = UDim2.new(1, -60, 0, 22)
-			Label.Position = UDim2.new(0, 12, 0, 4)
+			Label.Position = UDim2.new(0, 14, 0, 6)
 			Label.BackgroundTransparency = 1
 			Label.Text = Name
-			Label.TextColor3 = Library.Theme.Text
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 13
 			Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -415,25 +577,25 @@ function Library:CreateWindow(Settings)
 
 			local ValLabel = Instance.new("TextLabel")
 			ValLabel.Size = UDim2.new(0, 50, 0, 22)
-			ValLabel.Position = UDim2.new(1, -62, 0, 4)
+			ValLabel.Position = UDim2.new(1, -64, 0, 6)
 			ValLabel.BackgroundTransparency = 1
 			ValLabel.Text = tostring(Default)
-			ValLabel.TextColor3 = Library.Theme.SubText
+			ValLabel.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
 			ValLabel.Font = Enum.Font.Gotham
 			ValLabel.TextSize = 12
 			ValLabel.TextXAlignment = Enum.TextXAlignment.Right
 			ValLabel.Parent = Frame
 
 			local Track = Instance.new("Frame")
-			Track.Size = UDim2.new(1, -24, 0, 6)
-			Track.Position = UDim2.new(0, 12, 0, 32)
-			Track.BackgroundColor3 = Library.Theme.Element
+			Track.Size = UDim2.new(1, -28, 0, 6)
+			Track.Position = UDim2.new(0, 14, 0, 34)
+			Track.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element
 			Track.Parent = Frame
 			Corner(Track, 4)
 
 			local Fill = Instance.new("Frame")
 			Fill.Size = UDim2.new(math.clamp((Default - Min)/(Max - Min), 0, 1), 0, 1, 0)
-			Fill.BackgroundColor3 = Library.Theme.Accent
+			Fill.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Accent
 			Fill.Parent = Track
 			Corner(Fill, 4)
 
@@ -464,7 +626,6 @@ function Library:CreateWindow(Settings)
 			end)
 		end
 
-		-- 4. DROPDOWN
 		function TabApi:CreateDropdown(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Dropdown"
@@ -473,19 +634,19 @@ function Library:CreateWindow(Settings)
 			local Callback = Settings.Callback or function() end
 
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 40)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 42)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.ClipsDescendants = true
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(1, -30, 0, 40)
-			Label.Position = UDim2.new(0, 12, 0, 0)
+			Label.Size = UDim2.new(1, -30, 0, 42)
+			Label.Position = UDim2.new(0, 14, 0, 0)
 			Label.BackgroundTransparency = 1
 			Label.Text = Name .. ": " .. tostring(Current)
-			Label.TextColor3 = Library.Theme.Text
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 13
 			Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -493,14 +654,14 @@ function Library:CreateWindow(Settings)
 
 			local Open = false
 			local ToggleBtn = Instance.new("TextButton")
-			ToggleBtn.Size = UDim2.new(1, 0, 0, 40)
+			ToggleBtn.Size = UDim2.new(1, 0, 0, 42)
 			ToggleBtn.BackgroundTransparency = 1
 			ToggleBtn.Text = ""
 			ToggleBtn.Parent = Frame
 
 			local Holder = Instance.new("Frame")
 			Holder.Size = UDim2.new(1, 0, 0, #Options * 30)
-			Holder.Position = UDim2.new(0, 0, 0, 40)
+			Holder.Position = UDim2.new(0, 0, 0, 42)
 			Holder.BackgroundTransparency = 1
 			Holder.Parent = Frame
 
@@ -511,10 +672,10 @@ function Library:CreateWindow(Settings)
 			for _, opt in ipairs(Options) do
 				local OptBtn = Instance.new("TextButton")
 				OptBtn.Size = UDim2.new(1, 0, 0, 30)
-				OptBtn.BackgroundColor3 = Library.Theme.Element
+				OptBtn.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element
 				OptBtn.BackgroundTransparency = 0.4
 				OptBtn.Text = tostring(opt)
-				OptBtn.TextColor3 = Library.Theme.SubText
+				OptBtn.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
 				OptBtn.Font = Enum.Font.Gotham
 				OptBtn.TextSize = 12
 				OptBtn.Parent = Holder
@@ -523,18 +684,19 @@ function Library:CreateWindow(Settings)
 					Current = opt
 					Label.Text = Name .. ": " .. tostring(Current)
 					Open = false
-					TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, -6, 0, 40)}):Play()
+					TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, -6, 0, 42)}):Play()
 					pcall(Callback, Current)
 				end)
 			end
 
 			ToggleBtn.MouseButton1Click:Connect(function()
 				Open = not Open
-				TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, -6, 0, Open and (40 + #Options * 30) or 40)}):Play()
+				TweenService:Create(Frame, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					Size = UDim2.new(1, -6, 0, Open and (42 + #Options * 30) or 42)
+				}):Play()
 			end)
 		end
 
-		-- 5. INPUT (Text Box)
 		function TabApi:CreateInput(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Input"
@@ -543,17 +705,17 @@ function Library:CreateWindow(Settings)
 
 			local Frame = Instance.new("Frame")
 			Frame.Size = UDim2.new(1, -6, 0, 42)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
 			Label.Size = UDim2.new(0.45, 0, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
+			Label.Position = UDim2.new(0, 14, 0, 0)
 			Label.BackgroundTransparency = 1
 			Label.Text = Name
-			Label.TextColor3 = Library.Theme.Text
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 13
 			Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -562,44 +724,42 @@ function Library:CreateWindow(Settings)
 			local Box = Instance.new("TextBox")
 			Box.Size = UDim2.new(0.5, 0, 0, 26)
 			Box.Position = UDim2.new(0.5, -10, 0.5, -13)
-			Box.BackgroundColor3 = Library.Theme.Element
+			Box.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element
 			Box.Text = ""
 			Box.PlaceholderText = Placeholder
-			Box.TextColor3 = Library.Theme.Text
-			Box.PlaceholderColor3 = Library.Theme.SubText
+			Box.TextColor3 = Library.Themes[Library.CurrentTheme].Text
+			Box.PlaceholderColor3 = Library.Themes[Library.CurrentTheme].SubText
 			Box.Font = Enum.Font.Gotham
 			Box.TextSize = 12
 			Box.Parent = Frame
 			Corner(Box, 6)
-			Stroke(Box, Library.Theme.Border, 1)
+			Stroke(Box, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			Box.FocusLost:Connect(function(enterPressed)
 				pcall(Callback, Box.Text)
 			end)
 		end
 
-		-- 6. LABEL
 		function TabApi:CreateLabel(Text)
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 30)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 32)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 6)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(1, -24, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
+			Label.Size = UDim2.new(1, -28, 1, 0)
+			Label.Position = UDim2.new(0, 14, 0, 0)
 			Label.BackgroundTransparency = 1
 			Label.Text = tostring(Text)
-			Label.TextColor3 = Library.Theme.SubText
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 12
 			Label.TextXAlignment = Enum.TextXAlignment.Left
 			Label.Parent = Frame
 		end
 
-		-- 7. COLORPICKER
 		function TabApi:CreateColorPicker(Settings)
 			Settings = Settings or {}
 			local Name = Settings.Name or "Color Picker"
@@ -607,32 +767,31 @@ function Library:CreateWindow(Settings)
 			local Callback = Settings.Callback or function() end
 
 			local Frame = Instance.new("Frame")
-			Frame.Size = UDim2.new(1, -6, 0, 40)
-			Frame.BackgroundColor3 = Library.Theme.Container
+			Frame.Size = UDim2.new(1, -6, 0, 42)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
 			Frame.Parent = Page
 			Corner(Frame, 8)
-			Stroke(Frame, Library.Theme.Border, 1)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
 
 			local Label = Instance.new("TextLabel")
 			Label.Size = UDim2.new(1, -60, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
+			Label.Position = UDim2.new(0, 14, 0, 0)
 			Label.BackgroundTransparency = 1
 			Label.Text = Name
-			Label.TextColor3 = Library.Theme.Text
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
 			Label.Font = Enum.Font.GothamMedium
 			Label.TextSize = 13
 			Label.TextXAlignment = Enum.TextXAlignment.Left
 			Label.Parent = Frame
 
 			local ColorPreview = Instance.new("Frame")
-			ColorPreview.Size = UDim2.new(0, 30, 0, 20)
-			ColorPreview.Position = UDim2.new(1, -42, 0.5, -10)
+			ColorPreview.Size = UDim2.new(0, 32, 0, 22)
+			ColorPreview.Position = UDim2.new(1, -44, 0.5, -11)
 			ColorPreview.BackgroundColor3 = Default
 			ColorPreview.Parent = Frame
 			Corner(ColorPreview, 6)
-			Stroke(ColorPreview, Library.Theme.Border, 1)
+			Stroke(ColorPreview, Library.Themes[Library.CurrentTheme].Border, 1)
 
-			-- Ein simpler ColorPicker Cycle/Trigger
 			local Colors = {
 				Color3.fromRGB(255, 0, 0),
 				Color3.fromRGB(0, 255, 0),
@@ -657,8 +816,82 @@ function Library:CreateWindow(Settings)
 			end)
 		end
 
+		function TabApi:CreateKeybind(Settings)
+			Settings = Settings or {}
+			local Name = Settings.Name or "Keybind"
+			local Default = Settings.CurrentKeybind or "K"
+			local Callback = Settings.Callback or function() end
+
+			local Frame = Instance.new("Frame")
+			Frame.Size = UDim2.new(1, -6, 0, 42)
+			Frame.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Container
+			Frame.Parent = Page
+			Corner(Frame, 8)
+			Stroke(Frame, Library.Themes[Library.CurrentTheme].Border, 1)
+
+			local Label = Instance.new("TextLabel")
+			Label.Size = UDim2.new(0.6, 0, 1, 0)
+			Label.Position = UDim2.new(0, 14, 0, 0)
+			Label.BackgroundTransparency = 1
+			Label.Text = Name
+			Label.TextColor3 = Library.Themes[Library.CurrentTheme].Text
+			Label.Font = Enum.Font.GothamMedium
+			Label.TextSize = 13
+			Label.TextXAlignment = Enum.TextXAlignment.Left
+			Label.Parent = Frame
+
+			local BindBtn = Instance.new("TextButton")
+			BindBtn.Size = UDim2.new(0, 80, 0, 26)
+			BindBtn.Position = UDim2.new(1, -92, 0.5, -13)
+			BindBtn.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Element
+			BindBtn.Text = Default
+			BindBtn.TextColor3 = Library.Themes[Library.CurrentTheme].SubText
+			BindBtn.Font = Enum.Font.GothamSemibold
+			BindBtn.TextSize = 12
+			BindBtn.Parent = Frame
+			Corner(BindBtn, 6)
+			Stroke(BindBtn, Library.Themes[Library.CurrentTheme].Border, 1)
+
+			local Listening = false
+
+			BindBtn.MouseButton1Click:Connect(function()
+				Listening = true
+				BindBtn.Text = "..."
+				TweenService:Create(BindBtn, TweenInfo.new(0.2), {TextColor3 = Library.Themes[Library.CurrentTheme].Accent}):Play()
+			end)
+
+			UserInputService.InputBegan:Connect(function(input, processed)
+				if Listening and not processed and input.UserInputType == Enum.UserInputType.Keyboard then
+					Listening = false
+					CurrentToggleKey = input.KeyCode.Name
+					BindBtn.Text = CurrentToggleKey
+					TweenService:Create(BindBtn, TweenInfo.new(0.2), {TextColor3 = Library.Themes[Library.CurrentTheme].SubText}):Play()
+					pcall(Callback, CurrentToggleKey)
+				end
+			end)
+		end
+
 		return TabApi
 	end
+
+	local SettingsTab = WindowApi:CreateTab("Settings", "settings", true)
+
+	SettingsTab:CreateKeybind({
+		Name = "Toggle Keybind",
+		CurrentKeybind = CurrentToggleKey,
+		Callback = function(Key)
+			CurrentToggleKey = Key
+		end
+	})
+
+	SettingsTab:CreateDropdown({
+		Name = "UI Theme",
+		Options = {"Dark", "Midnight", "Crimson", "Emerald"},
+		CurrentOption = "Dark",
+		Callback = function(ThemeName)
+			UpdateTheme(ThemeName)
+		end
+	})
 
 	return WindowApi
 end
