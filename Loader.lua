@@ -200,6 +200,8 @@ function Library:CreateWindow(Settings)
 	Topbar.Parent = Main
 
 	Corner(Topbar, 14)
+	Topbar.WaitForChild("UICorner").BottomLeftRadius = UDim2.new(0, 0)
+	Topbar.WaitForChild("UICorner").BottomRightRadius = UDim2.new(0, 0)
 	MakeDraggable(Main, Topbar)
 
 	local GlowLine = Instance.new("Frame")
@@ -248,6 +250,11 @@ function Library:CreateWindow(Settings)
 	Sidebar.BackgroundColor3 = Library.Themes[Library.CurrentTheme].Sidebar
 	Sidebar.BorderSizePixel = 0
 	Sidebar.Parent = Main
+
+	local SidebarUiCorner = Instance.new("UICorner")
+	SidebarUiCorner.CornerRadius = UDim2.new(0, 0)
+	SidebarUiCorner.BottomLeftRadius = UDim2.new(0, 14)
+	SidebarUiCorner.Parent = Sidebar
 
 	local TabHolder = Instance.new("ScrollingFrame")
 	TabHolder.Size = UDim2.new(1, -12, 1, -60)
