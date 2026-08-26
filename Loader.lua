@@ -200,8 +200,8 @@ function Library:CreateWindow(Settings)
 	Topbar.Parent = Main
 
 	Corner(Topbar, 14)
-	Topbar.WaitForChild("UICorner").BottomLeftRadius = UDim2.new(0, 0)
-	Topbar.WaitForChild("UICorner").BottomRightRadius = UDim2.new(0, 0)
+	Topbar:WaitForChild("UICorner").BottomLeftRadius = UDim2.new(0, 0)
+	Topbar:WaitForChild("UICorner").BottomRightRadius = UDim2.new(0, 0)
 	MakeDraggable(Main, Topbar)
 
 	local GlowLine = Instance.new("Frame")
