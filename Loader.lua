@@ -188,7 +188,6 @@ function Library:CreateWindow(Settings)
 	GlowBg.Size = UDim2.new(1, 0, 1, 0)
 	GlowBg.Position = UDim2.new(0, -30, 0, -30)
 	GlowBg.BackgroundTransparency = 1
-	GlowBg.Image = "rbxassetid://5028857472"
 	GlowBg.ImageColor3 = Library.Themes[Library.CurrentTheme].Accent
 	GlowBg.ImageTransparency = 0.8
 	GlowBg.Parent = Main
