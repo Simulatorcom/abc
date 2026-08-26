@@ -185,14 +185,12 @@ function Library:CreateWindow(Settings)
 
 	local GlowBg = Instance.new("ImageLabel")
 	GlowBg.Name = "Glow"
-	GlowBg.Size = UDim2.new(1, 60, 1, 60)
+	GlowBg.Size = UDim2.new(1, 0, 1, 0)
 	GlowBg.Position = UDim2.new(0, -30, 0, -30)
 	GlowBg.BackgroundTransparency = 1
 	GlowBg.Image = "rbxassetid://5028857472"
 	GlowBg.ImageColor3 = Library.Themes[Library.CurrentTheme].Accent
 	GlowBg.ImageTransparency = 0.8
-	GlowBg.ScaleType = Enum.ScaleType.Slice
-	GlowBg.SliceCenter = Rect.new(24, 24, 276, 276)
 	GlowBg.Parent = Main
 
 	local Topbar = Instance.new("Frame")
